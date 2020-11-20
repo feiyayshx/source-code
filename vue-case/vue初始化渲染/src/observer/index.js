@@ -8,7 +8,7 @@ class Observer {
 
     Object.defineProperty(value,'__ob__',{
         value: this,
-        enumerable: false,
+        enumerable: false, // 不可枚举
         configurable:false,// 不能删除此属性
     })
     // value可能是对象，也可能是数组，分情况处理
@@ -38,7 +38,7 @@ class Observer {
 // 定义一个方法，调用defineProperty 来观测数据，可以复用该方法
 export function defineReactive(data, key, value) {
   // 如果value也是对象，递归观测对象
-  ovserve(value)
+  observe(value)
   Object.defineProperty(data, key, {
     get() {
       return value
