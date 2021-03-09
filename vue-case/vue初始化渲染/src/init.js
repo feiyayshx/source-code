@@ -1,6 +1,6 @@
 import { initState } from './state.js'
 import { compileToFunctions } from './compiler/index.js'
-
+import { mountComponent } from './lifecycle.js'
 // 初始化-》初始化状态-》初始化数据
 
 export function initMixin(Vue) {
@@ -43,6 +43,9 @@ export function initMixin(Vue) {
       vm.$options.render = render
 
     }
+
+    mountComponent(vm, el)
+
   }
 }
 
