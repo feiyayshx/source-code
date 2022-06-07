@@ -479,7 +479,8 @@ class Promise {
 - 如果value值是promise,则继续解析。
 
 读到此处的小伙伴恭喜你：一个符合Promise A+规范的高阶版的Promise已经实现了！！！
-[点击查看高阶版全部代码]()
+
+[点击查看高阶版全部代码](https://github.com/feiyayshx/source-code/blob/main/promise/promise2.js)
 
 ## 测试案例
 then链式调用测试：
