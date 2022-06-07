@@ -537,3 +537,231 @@ then传递的成功和失败的回调函数，它们的返回值决定下一个t
   - 代码抛出错误
   - 上一个then中有返回了一个失败的promise 
 - 如果返回的是一个pending的proimise 则会中断promoise的链。
+
+## Promise扩展方法
+Promise A+规范针对的是Promise的规则，并不包含与Promise相关的方法，Promise相关方法都是后期为了方便使用而扩展的。下面手写常用的Promise扩展方法：
+### Promise.prototype.catch方法
+catch方法用来捕获错误，本质上是执行一个仅有onRejected回调的then方法。
+
+```
+class Promise {
+  constructor() {}
+  then() {...}
+  // 捕获错误
+  catch(onRejected){
+    return this.then(null,onRejected)
+  }
+}
+```
+
+### Promise.prototype.finally
+不管promise状态是成功还是拒绝,都会走到finally里。
+```
+Promise.ptototype.finally = function(final) {
+  return this.then((value) => {
+    // 执行final(), 并将value或reason传递下去
+    return Promise.resolve(final()).then(() => value)
+  },(reason) => {
+    return Promise.resolve(final()).then(() => { throw reason })
+  })
+}
+```
+
+### Promise.deferred延迟对象
+
+- 延迟对象返回一个promise实例，resolve,reject。
+- 延迟对象提前将resolve,reject保存起来，延迟到某个时刻再执行。
+- 将业务中不可变的部分封装在deferred内部，将可变的部分交给promise处理。
+- deferred主要用于内部，用于维护异步模型状态。
+- Promise主要作用于外部，通过then方法暴露给外部以添加自定义逻辑。
+
+Promise.deferred代码实现：
+```
+Promise.deferred = function() {
+  let dfd = {}
+  // 延迟对象返回一个promise实例，resolve,reject
+  dfd.promise = new Promise((resolve,reject) => {
+    dfd.resolve = resolve
+    dfd.reject = reject
+  })
+  return dfd
+}
+```
+
+### Promise.resolve
+将一个现有对象转换为Promise对象。
+
+```
+Promise.resolve = function(value) {
+  return new Promise(resolve => {
+    resolve(value)
+  })
+}
+```
+
+
+### Promise.reject
+将一个现有对象转换为Promise对象,且promise状态是rejected。
+
+```
+Promise.reject = function (reason) {
+  return new Promise((resolve, reject) => {
+      reject(reason)
+  })
+}
+```
+
+### Promise.all
+将多个 Promise 实例，包装成一个新的 Promise 实例。
+多个promise全部成功Promise.all才成功执行，有一个promise失败，promise.all就拒绝执行，走向失败。
+
+```
+Promise.all = function(values) {
+  return new Promise((resolve,reject) => {
+    let result = []
+    let times = 0
+    const processMap = (i,data) => {
+      result[i] = data
+      times++
+      if(times === values.length) {
+        resolve(result)
+      }
+    }
+    // for循环是并发的，异步串行需要使用递归实现
+    for(let index=0;index<values.length;index++) {
+      let item = values[index]
+      Promise.resolve(item).then(data => {
+        processMap(index,data)
+      },reject)
+    }
+  })
+
+}
+
+```
+
+### Promise.race
+将多个 Promise 实例，包装成一个新的 Promise实例。
+多个promise实例中，谁先改变promise状态，Promise.race的状态就以它为准。
+其实，Promise.race的状态就是第一次改变的那个promise状态。
+```
+Promise.race = function(values) {
+  return new Promise((resolve,reject) => {
+    values.forEach(item => {
+      Promise.resolve(item).then(resolve,reject)
+    })
+  })
+}
+```
+### Promise.allSettled
+多个promise实例的异步操作都结束，Promise.allSettled 才执行成功。
+不论promise的结果是成功还是拒绝，Promise.allSettled的状态都是成功。
+
+```
+Promise.allSettled = function(values) {
+  return new Promise(resolve => {
+    let result = []
+    let times = 0
+
+    const processMap = (i,data) => {
+      result[i] = data
+      times++
+      if(times === values.length) {
+        resolve(result)
+      }
+    }
+
+    for(let index=0; index<values.length;index++) {
+      let item = values[index]
+      Promise.resolve(item).then((v) =>{
+        processMap(index,{status: 'fulfilled',value:v})
+      },reason=>{
+        processMap(index,{status: 'rejected',reason})
+      })
+    }
+  })
+}
+```
+
+测试
+```
+let p1 = new Promise(resolve => {
+  setTimeout(() => {
+    resolve('p1')
+  },1000)
+})
+let p2 = new Promise((resolve,reject) => {
+  setTimeout(() => {
+    reject('失败了')
+  },2000)
+})
+
+Promise.allSettled([p1,p2]).then(res => {
+  console.log(res)
+})
+
+// 输出
+[
+  { status: 'fulfilled', value: 'p1' },
+  { status: 'rejected', reason: '失败了' }
+]
+```
+
+### Promise.any
+ES2021引入的方法，将多个 Promise 实例，包装成一个新的 Promise实例。
+只要多个promise中有一个变成fulfilled状态，Promise.any也是fulfilled状态，成功执行。
+如果多个promise全部变成rejected状态，Promise.any就是rejected状态，拒绝执行。
+
+```
+Promise.any = function(values) {
+  return new Promise((resolve,reject) => {
+    let result = []
+    let times = 0
+    const processMap = (i,reason) => {
+      result[i] = reason
+      times++
+      if(times === values.length) {
+        reject(result)
+      }
+    }
+    for(let index=0; index<values.length;index++) {
+      let item = values[index]
+      Promise.resolve(item).then(resolve, (reason) => {
+        processMap(index,reason)
+      })
+    }
+  })
+}
+```
+
+测试：
+```
+let p1 = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    // resolve('p1')
+    reject('失败p1')
+  },1000)
+})
+let p2 = new Promise((resolve,reject) => {
+  setTimeout(() => {
+    reject('失败p2')
+  },2000)
+})
+
+Promise.any([p1,p2]).then(res => {
+  // p1或p2只要有一个成功，就走向成功
+  console.log(res)
+},(reason) => {
+  // p1,p2全部失败，走向失败
+  console.log(reason)
+})
+
+// 输出: [ '失败p1', '失败p2' ]
+```
+
+[点击查看完整版代码](https://github.com/feiyayshx/source-code/blob/main/promise/promise3.js)
+
+
+Promise A+ 规范参考：
+[Promise A+ (英文)](https://promisesaplus.com/)
+[Promise A+ (中文译-图灵社区)](https://www.ituring.com.cn/article/66566)
