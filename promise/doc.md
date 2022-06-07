@@ -763,5 +763,7 @@ Promise.any([p1,p2]).then(res => {
 
 
 Promise A+ 规范参考：
+
 [Promise A+ (英文)](https://promisesaplus.com/)
+
 [Promise A+ (中文译-图灵社区)](https://www.ituring.com.cn/article/66566)
