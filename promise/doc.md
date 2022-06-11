@@ -536,7 +536,7 @@ then传递的成功和失败的回调函数，它们的返回值决定下一个t
 - 下一个then走向失败的情况：
   - 代码抛出错误
   - 上一个then中有返回了一个失败的promise 
-- 如果返回的是一个pending的proimise 则会中断promoise的链。
+- 如果返回的是一个pending状态的proimise 则会中断promise链。
 
 ## Promise扩展方法
 Promise A+规范针对的是Promise的规则，并不包含与Promise相关的方法，Promise相关方法都是后期为了方便使用而扩展的。下面手写常用的Promise扩展方法：
