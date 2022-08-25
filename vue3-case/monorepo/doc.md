@@ -39,20 +39,21 @@ monorepo主要缺点：
 
 ### Monorepo的实现方案
 
-#### lerna
-[lerna](https://lerna.js.org/docs/introduction)
+1. [lerna](https://lerna.js.org/docs/introduction)
 
-#### nx
-[nx](https://nx.dev/getting-started/intro)
+2. [nx](https://nx.dev/getting-started/intro)
 
-#### pnpm
-pnpm天生支持monorepo
+3. [pnpm](https://pnpm.io/)
 
 ## pnpm
+pnpm的几个特点：
+1. pnpm的目的是节省磁盘空间并提升安装速度。
+2. 创建非扁平的node_modules目录。
+  pnpm安装的包及其依赖项被下载到.pnpm中,node_modules根目录下仅暴露项目直接依赖的包。
+  npm安装的包及其依赖项都被下载到node_modules的根目录下,属于同级关系。
+3. 使用符号链接的node_modules结构。
 
 ## Vue3项目模块介绍
-
-
 
 
 ## 搭建Vue3源码项目开发环境
