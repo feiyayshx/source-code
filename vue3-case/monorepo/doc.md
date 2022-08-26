@@ -3,6 +3,7 @@
 本章学习的知识点：
 - 掌握monorepo管理项目。
 - 掌握pnpm依赖包管理。
+- 了解esbuild打包。
 - 了解vue3源码各个模块负责的功能。
 
 ## monorepo
@@ -137,6 +138,52 @@ pnpm tsc --init
 ```
 
 ### 创建模块
+
+在packages目录下先创建两个模块：reactivity响应式模块、shared共享工具库模块。
+每个包的入口统一为src/index.ts
+
+**reactivity/package.json 如下：**
+
+```
+{
+  "name": "@vue/reactivity",
+  "version": "1.0.0",
+  "main": "index.js",
+  "module":"dist/reactivity.esm-bundler.js",
+  "unpkg": "dist/reactivity.global.js",
+  "buildOptions": {
+    "name": "VueReactivity",
+    "formats": [
+      "esm-bundler",
+      "cjs",
+      "global"
+    ]
+  }
+
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
+```
+
+**shared/package.json 如下：**
+
+```
+{
+  "name": "@vue/shared",
+  "version": "1.0.0",
+  "main": "index.js",
+  "module": "dist/shared.esm-bundler.js",
+  "buildOptions": {
+    "formats": [
+        "esm-bundler",
+        "cjs"
+    ]
+  }
+}
+
+```
+
 
 ### 开发环境esbuild打包
 
