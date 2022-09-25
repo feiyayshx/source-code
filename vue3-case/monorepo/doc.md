@@ -183,11 +183,91 @@ pnpm tsc --init
 }
 
 ```
+**shared/src/index.ts 添加代码：**
 
+```
+export const isObject = (value) => {
+    return typeof value === 'object' && value !== null;
+}
+```
 
-### 开发环境esbuild打包
+**在reactivity包内引入shared包方法需要在tsconfig.json中配置包路径:**
+```
+{
+  ...
+  "baseUrl": ".",
+  "paths":{
+    "@vue/*":["packages/*/src"]
+  }
+}
+```
 
-### 生产环境rollup打包
+**reactivity模块内，将依赖包@vue/shared下载到reactivity模块内，可执行如下命令：**
+```
+pnpm install @vue/shared@workspace --filter @vue/reactivity
+
+```
+
+### 开发环境配置
+开发环境使用esbuild打包工具。
+1. 创建打包脚本：创建scripts/dev.js文件
+```
+const {resolve} = require('path')
+const {build} = require('esbuild')
+// 获取命令行参数
+const args = require('minimist')(process.argv.slice(2))
+// console.log(args,'args') // { _: [ 'reactivity' ], f: 'global' }
+
+// 打包目标
+const target = args._[0] || 'reactivity'
+// 目标文件格式
+const format = args.f || 'global'
+
+//入口文件
+const entry = resolve(__dirname,`../packages/${target}/src/index.ts`)
+
+// 打包的模块的package.json
+const pkg = require(resolve(__dirname,`../packages/${target}/package.json`));
+
+// iife 自执行函数：(function(){})()
+// cjs common.js规范
+// esm es6Module
+
+// 打包后输出的文件格式
+const outputFormat = format.startsWith('global') ? 'iife': format==='cjs' ? 'cjs': 'esm'
+// 打包后输出的文件
+const outfile = resolve(__dirname,`../packages/${target}/dist/${target}.${format}.js`)
+
+// console.log(outfile,entry,outputFormat,format)
+
+// 天生就支持ts
+build({
+    entryPoints: [entry], // 打包入口文件
+    outfile, // 打包输出文件
+    bundle: true, // 把所有的包全部打包到一起
+    sourcemap: true, // 是否生成map文件
+    format: outputFormat,// 输出的格式
+    globalName: pkg.buildOptions?.name, // 打包的全局的名字
+    platform: format === 'cjs' ? 'node' : 'browser', // 平台
+    watch: { // 监控文件变化
+        onRebuild(error) {
+            if (!error) console.log(`rebuilt~~~~`)
+        }
+    }
+}).then(() => {
+    console.log('watching~~~')
+})
+```
+2. 创建打包命令
+package.json 文件配置：
+```
+  ...
+  "scripts": {
+    "dev":"node scripts/dev.js reactivity -f global"
+  },
+```
+
+### 生产环境rollup打包配置
 
 
 **参考**

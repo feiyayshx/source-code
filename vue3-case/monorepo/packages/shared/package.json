@@ -1,7 +1,7 @@
 {
   "name": "@vue/shared",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "dist/index.js",
   "module": "dist/shared.esm-bundler.js",
   "buildOptions": {
     "formats": [
@@ -11,5 +11,9 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "baseUrl": ".",
+  "paths":{
+    "@vue/*":["packages/*/src"]
+  }
 }

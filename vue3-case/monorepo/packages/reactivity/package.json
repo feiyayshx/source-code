@@ -2,7 +2,8 @@
   "name": "@vue/reactivity",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "module": "dist/reactivity.esm-bundler.js",
   "buildOptions": {
     "name": "VueReactivity",
     "formats": [
@@ -13,5 +14,8 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "@vue/shared": "workspace:^1.0.0"
+  }
 }
