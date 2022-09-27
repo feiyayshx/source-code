@@ -191,7 +191,8 @@ export const isObject = (value) => {
 }
 ```
 
-**在reactivity包内引入shared包方法需要在tsconfig.json中配置包路径:**
+**在reactivity包内引入shared包方法需要在tsconfig.json中配置包路径,避免ts类型警告:**
+
 ```
 {
   ...
@@ -266,9 +267,26 @@ package.json 文件配置：
     "dev":"node scripts/dev.js reactivity -f global"
   },
 ```
+### 验证测试
+reactivity/dist/下创建index.html文件，引入打包后的reactivity.global.js文件
 
-### 生产环境rollup打包配置
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>reactivity</title>
+</head>
+<body>
+  <script src="./reactivity.global.js"></script>
+</body>
+</html>
+```
+浏览器打开index.html，控制台查看输出的数据，有数据即正常访问。
 
+至此，基于monorepo构建的vue3项目开发环境基本搭建完成。
 
 **参考**
 
