@@ -56,6 +56,7 @@ pnpm的几个特点：
 
 ## Vue3项目模块介绍
 
+![vue3模块](./vue3-modules.png)
 
 ## 搭建Vue3源码项目开发环境
 
