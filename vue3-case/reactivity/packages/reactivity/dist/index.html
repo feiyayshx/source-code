@@ -7,12 +7,23 @@
   <title>reactivity</title>
 </head>
 <body>
-  <!-- 原生vue完整版引入使用 -->
-  <script src="../../../node_modules/vue/dist/vue.global.js"></script>
-<script>
-  const { reactive } = Vue 
-  console.log(reactive,'reactive')
-</script>
-  <!--  -->
+  <div id="app"></div>
+  <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+  <script src="./reactivity.global.js"></script>
+  <script>
+    const { effect, reactive } = VueReactivity
+    // 定义响应式数据
+    const state = reactive({userName: 'rose', date: '2000-09-2',addr: '杭州市'})
+
+    // effect是副作用函数，初始化执行一次，代理数据变化后会重新执行effect函数
+    effect(() => {
+      app.innerHTML = state.userName + '出生日期：' + state.date + '住址：' + state.addr
+    })
+
+    setTimeout(() => {
+      state.addr = '浙江省杭州'
+    },1000)
+
+  </script>
 </body>
 </html>
