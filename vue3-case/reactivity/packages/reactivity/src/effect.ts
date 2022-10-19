@@ -35,9 +35,26 @@ export class ReactiveEffect {
 // 依赖收集原理：借助js单线程的特点，调用effect()时会调用proxy的get,在get里面让属性关联effect,
 // 关联的数据结构WeakMap, 例如：{target: {name:[effect,effect],date:[effect,effect]}}
 // target是对象，对应的值是Map类型; name是Map中的一个key,对应的值是Set类型，存储不重复的effect
-
 // 收集时需要知道某个对象中的某个属性对应哪个effect(一个属性可能对应多个effect)
 const targetMap = new WeakMap()
+
+// 触发更新：找到effect,然后执行
+export function trigger(target,key,value) {
+    let depsMap = targetMap.get(target)
+    // 属性没有依赖任何effect
+    if(!depsMap) return
+
+    // 找到effect，然后执行
+    const effects = depsMap.get(key)
+    effects&&effects.forEach(effect => {
+        // 这里做了判断，是为了防止重复执行当前effect
+        if(effect!==activeEffect) {
+            effect.run()
+        }
+    })
+
+}
+
 export function track(target,key) {
     if(activeEffect) {
         // 查找对象的值

@@ -49,6 +49,17 @@ var VueReactivity = (() => {
     }
   };
   var targetMap = /* @__PURE__ */ new WeakMap();
+  function trigger(target, key, value) {
+    let depsMap = targetMap.get(target);
+    if (!depsMap)
+      return;
+    const effects = depsMap.get(key);
+    effects && effects.forEach((effect2) => {
+      if (effect2 !== activeEffect) {
+        effect2.run();
+      }
+    });
+  }
   function track(target, key) {
     if (activeEffect) {
       let depsMap = targetMap.get(target);
@@ -87,7 +98,13 @@ var VueReactivity = (() => {
       return Reflect.get(target, key, receiver);
     },
     set(target, key, value, receiver) {
-      return Reflect.set(target, key, value, receiver);
+      let oldValue = target[key];
+      if (oldValue !== value) {
+        let result = Reflect.set(target, key, value, receiver);
+        trigger(target, key, value);
+        return result;
+      }
+      return;
     }
   };
 
