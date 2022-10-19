@@ -25,7 +25,7 @@ var VueReactivity = (() => {
   });
 
   // packages/reactivity/src/effect.ts
-  var activEffect = void 0;
+  var activeEffect = void 0;
   var ReactiveEffect = class {
     constructor(fn) {
       this.fn = fn;
@@ -38,11 +38,11 @@ var VueReactivity = (() => {
         return this.fn();
       } else {
         try {
-          this.parent = activEffect;
-          activEffect = this;
+          this.parent = activeEffect;
+          activeEffect = this;
           this.fn();
         } finally {
-          activEffect = this.parent;
+          activeEffect = this.parent;
           this.parent = null;
         }
       }
@@ -50,7 +50,7 @@ var VueReactivity = (() => {
   };
   var targetMap = /* @__PURE__ */ new WeakMap();
   function track(target, key) {
-    if (activEffect) {
+    if (activeEffect) {
       let depsMap = targetMap.get(target);
       if (!depsMap) {
         targetMap.set(target, depsMap = /* @__PURE__ */ new Map());
@@ -59,12 +59,13 @@ var VueReactivity = (() => {
       if (!deps) {
         depsMap.set(key, deps = /* @__PURE__ */ new Set());
       }
-      let shouldTrack = !deps.has(activEffect);
+      let shouldTrack = !deps.has(activeEffect);
       if (shouldTrack) {
-        deps.add(activEffect);
-        activEffect.deps.push(deps);
+        deps.add(activeEffect);
+        activeEffect.deps.push(deps);
       }
     }
+    console.log(targetMap);
   }
   function effect(fn) {
     const _effect = new ReactiveEffect(fn);
