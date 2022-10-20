@@ -26,6 +26,13 @@ var VueReactivity = (() => {
 
   // packages/reactivity/src/effect.ts
   var activeEffect = void 0;
+  function cleanEffect(effect2) {
+    let deps = effect2.deps;
+    for (let i = 0; i < deps.length; i++) {
+      deps[i].delete(effect2);
+    }
+    effect2.deps.length = 0;
+  }
   var ReactiveEffect = class {
     constructor(fn) {
       this.fn = fn;
@@ -40,11 +47,18 @@ var VueReactivity = (() => {
         try {
           this.parent = activeEffect;
           activeEffect = this;
+          cleanEffect(this);
           this.fn();
         } finally {
           activeEffect = this.parent;
           this.parent = null;
         }
+      }
+    }
+    stop() {
+      if (this.active) {
+        this.active = false;
+        cleanEffect(this);
       }
     }
   };
@@ -53,12 +67,15 @@ var VueReactivity = (() => {
     let depsMap = targetMap.get(target);
     if (!depsMap)
       return;
-    const effects = depsMap.get(key);
-    effects && effects.forEach((effect2) => {
-      if (effect2 !== activeEffect) {
-        effect2.run();
-      }
-    });
+    let effects = depsMap.get(key);
+    if (effects) {
+      effects = new Set(effects);
+      effects.forEach((effect2) => {
+        if (effect2 !== activeEffect) {
+          effect2.run();
+        }
+      });
+    }
   }
   function track(target, key) {
     if (activeEffect) {
@@ -81,6 +98,9 @@ var VueReactivity = (() => {
   function effect(fn) {
     const _effect = new ReactiveEffect(fn);
     _effect.run();
+    const runner = _effect.run.bind(_effect);
+    runner.effect = _effect;
+    return runner;
   }
 
   // packages/shared/src/index.ts

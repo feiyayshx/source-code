@@ -18,9 +18,12 @@
     // const state2 = reactive(state1)
 
     // effect是副作用函数，初始化执行一次，代理数据变化后会重新执行effect函数
-    effect(() => {
+    const runner = effect(() => {
+      // app.date = Math.random()
       app.innerHTML = state.userName + '出生日期：' + state.date + '住址：' + state.addr
     })
+
+    runner()
 
     // setTimeout(() => {
     //   state.addr = '浙江省杭州'

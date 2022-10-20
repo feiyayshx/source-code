@@ -1,6 +1,14 @@
 // 暴露当前的effect
 export let activeEffect = undefined
 
+function cleanEffect(effect) {
+    let deps = effect.deps
+    for(let i = 0; i < deps.length;i++) {
+        deps[i].delete(effect)
+    }
+    effect.deps.length = 0;
+}
+
 // ts语法定义的类
 export class ReactiveEffect {
     // 激活状态
@@ -20,6 +28,8 @@ export class ReactiveEffect {
                 this.parent = activeEffect
                 // 依赖收集，将属性与effect关联,当执行run时，this就是实例_effect，activeEffect缓存当前的effect实例
                 activeEffect = this
+                // 每次收集依赖前先清理现有effect中收集的属性，解决分支切换中无效的依赖收集
+                cleanEffect(this)
                 this.fn()
             }finally{
                 // fn执行完毕,将activeEffect回退到外层
@@ -29,6 +39,12 @@ export class ReactiveEffect {
         }
        
        
+    }
+    stop() {
+        if(this.active) {
+            this.active = false
+            cleanEffect(this)
+        }
     }
 }
 
@@ -45,14 +61,17 @@ export function trigger(target,key,value) {
     if(!depsMap) return
 
     // 找到effect，然后执行
-    const effects = depsMap.get(key)
-    effects&&effects.forEach(effect => {
-        // 这里做了判断，是为了防止重复执行当前effect
-        if(effect!==activeEffect) {
-            effect.run()
-        }
-    })
-
+    let effects = depsMap.get(key)
+    // 此处需要拷贝一个新的effects,防止对同一个集合变量删除添加导致无限循环
+    if(effects) {
+        effects = new Set(effects)
+        effects.forEach(effect => {
+            // 这里做了判断，是为了防止重复执行当前effect
+            if(effect!==activeEffect) {
+                effect.run()
+            }
+        })
+    }
 }
 
 export function track(target,key) {
@@ -87,5 +106,9 @@ export function effect(fn) {
     const _effect = new ReactiveEffect(fn)
     // 初始化时就执行一次effect回调
     _effect.run()
+    // 更改runner中的this
+    const runner = _effect.run.bind(_effect)
+    runner.effect = _effect
+    return runner
 }
 
