@@ -1,7 +1,7 @@
 // 暴露当前的effect
 export let activeEffect = undefined
 
-function cleanEffect(effect) {
+function cleanupEffect(effect) {
     let deps = effect.deps
     for(let i = 0; i < deps.length;i++) {
         deps[i].delete(effect)
@@ -29,7 +29,7 @@ export class ReactiveEffect {
                 // 依赖收集，将属性与effect关联,当执行run时，this就是实例_effect，activeEffect缓存当前的effect实例
                 activeEffect = this
                 // 每次收集依赖前先清理现有effect中收集的属性，解决分支切换中无效的依赖收集
-                cleanEffect(this)
+                cleanupEffect(this)
                 this.fn()
             }finally{
                 // fn执行完毕,将activeEffect回退到外层
@@ -43,7 +43,7 @@ export class ReactiveEffect {
     stop() {
         if(this.active) {
             this.active = false
-            cleanEffect(this)
+            cleanupEffect(this)
         }
     }
 }
@@ -62,7 +62,7 @@ export function trigger(target,key,value) {
 
     // 找到effect，然后执行
     let effects = depsMap.get(key)
-    // 此处需要拷贝一个新的effects,防止对同一个集合变量删除添加导致无限循环
+    // 此处需要拷贝一个新的effects,防止对同一个集合变量删除又添加导致无限循环
     if(effects) {
         effects = new Set(effects)
         effects.forEach(effect => {

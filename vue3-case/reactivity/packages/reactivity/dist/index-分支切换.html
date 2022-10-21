@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>reactivity</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+  <script src="./reactivity.global.js"></script>
+  <script>
+    const { effect, reactive } = VueReactivity
+    // 定义响应式数据
+    const user = {userName: 'rose', nickName: 'mary' ,flag: true, date: '2000-09-2', addr: '杭州市'}
+    const state = reactive(user)
+
+    // effect是副作用函数，初始化执行一次，代理数据变化后会重新执行effect函数
+    const runner = effect(() => {
+      // 此处存在分支判断
+      const name = state.flag ? state.userName:state.nickName
+      app.innerHTML = name + '出生日期：' + state.date + '住址：' + state.addr
+    })
+
+    // setTimeout(() => {
+    //   state.addr = '浙江省杭州'
+    // },1000)
+
+  </script>
+</body>
+</html>
