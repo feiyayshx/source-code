@@ -17,7 +17,7 @@ export class ReactiveEffect {
     public parent = null
     // effect中用了哪些属性，后续清理时要用
     public deps = []
-    constructor(public fn) {}
+    constructor(public fn,public scheduler) {}
     run () {
         if(!this.active) {
             // 非激活状态
@@ -68,7 +68,11 @@ export function trigger(target,key,value) {
         effects.forEach(effect => {
             // 这里做了判断，是为了防止重复执行当前effect
             if(effect!==activeEffect) {
-                effect.run()
+                if(effect.scheduler) {
+                    effect.scheduler()
+                } else {
+                    effect.run()
+                }
             }
         })
     }
@@ -100,10 +104,10 @@ export function track(target,key) {
     console.log(targetMap)
 }
 
-export function effect(fn) {
+export function effect(fn, options = {} as any) {
 
     // 将用户传递的函数变成响应式的effect
-    const _effect = new ReactiveEffect(fn)
+    const _effect = new ReactiveEffect(fn, options.scheduler)
     // 初始化时就执行一次effect回调
     _effect.run()
     // 更改runner中的this
