@@ -149,6 +149,11 @@ class Promise {
 
 module.exports = Promise
 
+/**
+ * finally: 不管promise执行结果如何，都会执行的操作
+ * finally方法的回调函数不接受任何参数
+ * finally方法里面的操作，与状态无关，不依赖Promise的执行结果
+ */ 
 Promise.prototype.finally = function(final) {
   return this.then((value) => {
     // 执行final(), 并将value或reason传递下去
