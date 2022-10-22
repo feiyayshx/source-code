@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>reactivity</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- <script src="../../../node_modules/@vue/reactivity/dist/reactivity.global.js"></script> -->
+  <script src="./reactivity.global.js"></script>
+  <script>
+    const { effect, reactive } = VueReactivity
+    // 定义响应式数据
+    const user = {id: 1, userName: 'rose', date: '2000-09-2',addr: '杭州市'}
+    const state = reactive(user)
+    const loading = false
+    // effect是副作用函数，初始化执行一次，代理数据变化后会重新执行effect函数
+    const runner = effect(() => {
+      // app.date = Math.random()
+      app.innerHTML = state.userName + '出生日期：' + state.date + '住址：' + state.addr
+    }, {
+      scheduler() {
+         // 调度函数
+         if(!loading) {
+          loading = true
+          Promise.resolve().then(() => {
+            runner()
+            loading = false
+          })
+         }
+      }
+    })
+
+    runner()
+
+    setTimeout(() => {
+      state.id++
+      state.id++
+      state.id++
+    },1000)
+
+  </script>
+</body>
+</html>
