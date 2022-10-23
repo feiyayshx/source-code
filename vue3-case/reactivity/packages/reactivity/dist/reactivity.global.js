@@ -98,7 +98,6 @@ var VueReactivity = (() => {
         activeEffect.deps.push(deps);
       }
     }
-    console.log(targetMap);
   }
   function effect(fn, options = {}) {
     const _effect = new ReactiveEffect(fn, options.scheduler);

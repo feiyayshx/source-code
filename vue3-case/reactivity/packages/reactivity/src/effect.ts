@@ -76,6 +76,7 @@ export function trigger(target,key,value) {
             }
         })
     }
+
 }
 
 export function track(target,key) {
@@ -101,7 +102,6 @@ export function track(target,key) {
             activeEffect.deps.push(deps)
         }
     }
-    console.log(targetMap)
 }
 
 export function effect(fn, options = {} as any) {
