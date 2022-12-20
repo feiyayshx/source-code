@@ -7,7 +7,7 @@ import { isObject } from "@vue/shared";
 import { reactive } from "./reactive";
 import { track, trigger } from "./effect";
 
-export const baseHandler = {
+export const mutableHandlers = {
     get(target,key,receiver) {
         if(key === ReactiveFlags.IS_REACTIVE) {
             return true

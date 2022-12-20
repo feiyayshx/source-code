@@ -64,19 +64,22 @@ export function trigger(target,key,value) {
     let effects = depsMap.get(key)
     // 此处需要拷贝一个新的effects,防止对同一个集合变量删除又添加导致无限循环
     if(effects) {
-        effects = new Set(effects)
-        effects.forEach(effect => {
-            // 这里做了判断，是为了防止重复执行当前effect
-            if(effect!==activeEffect) {
-                if(effect.scheduler) {
-                    effect.scheduler()
-                } else {
-                    effect.run()
-                }
-            }
-        })
+        triggerEffects(effects)
     }
+}
 
+export function triggerEffects(effects) {
+    effects = new Set(effects)
+    effects.forEach(effect => {
+        // 这里做了判断，是为了防止重复执行当前effect
+        if(effect!==activeEffect) {
+            if(effect.scheduler) {
+                effect.scheduler()
+            } else {
+                effect.run()
+            }
+        }
+    })
 }
 
 export function track(target,key) {
@@ -93,6 +96,15 @@ export function track(target,key) {
             // 属性不存在添加
             depsMap.set(key, (deps = new Set()))
         }
+
+        trackEffects(deps)
+       
+    }
+}
+
+
+export function trackEffects(deps) {
+    if(activeEffect) {
         // 是否收集
         let shouldTrack = !deps.has(activeEffect)
         if(shouldTrack){

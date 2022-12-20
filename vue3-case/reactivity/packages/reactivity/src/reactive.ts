@@ -1,5 +1,5 @@
 import { isObject } from "@vue/shared";
-import { ReactiveFlags,baseHandler } from './baseHandler'
+import { ReactiveFlags,mutableHandlers } from './baseHandler'
 
 // 创建一个缓存代理结果
 // WeakMap:弱引用，有利于垃圾回收，key必须是个对象
@@ -25,7 +25,7 @@ export function reactive(target) {
     }
 
     // 代理目标对象（es6中的proxy）
-    const proxy = new Proxy(target, baseHandler)
+    const proxy = new Proxy(target, mutableHandlers)
 
     // 缓存目标对象及其代理对象
     reactiveMap.set(target,proxy)

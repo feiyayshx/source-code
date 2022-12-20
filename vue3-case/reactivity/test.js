@@ -1,3 +1,5 @@
+const { effect } = require("vue")
+
 // 例子
 let user = {
     firstName: 'tom',
@@ -38,3 +40,16 @@ userProxy.firstName
 // 解决方法：使用Reflect,将原对象中的this指向代理对象
 userProxy.fullName
 
+effect(() => {
+    state.name = 'effect1'
+    effect(() => {
+        state.id = 1
+        state.name
+    })
+})
+
+/**
+ * activeEffect = undefined
+ * effect1执行：activeEffect -> effect1 -> effect1.parent = undefined
+ * effect2执行：
+ */
